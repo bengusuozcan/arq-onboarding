@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notion Onboarding — Arq Foundation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #191919;
+    --slide-bg: #ffffff;
+    --text: #37352f;
+    --text-light: #6b6b6b;
+    --accent: #2eaadc;
+    --accent-dark: #0b6e99;
+    --border: #e3e3e3;
+    --code-bg: #f7f6f3;
+    --highlight: #fff3db;
+    --arq-purple: #6c5ce7;
+    --arq-dark: #2d3436;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* Slide container */
+  .deck {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    background: var(--bg);
+    padding: 40px;
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .slide-inner {
+    background: var(--slide-bg);
+    border-radius: 16px;
+    max-width: 1100px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 56px 64px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 2.4em;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  h1 .accent { color: var(--accent); }
+
+  h2 {
+    font-size: 1.6em;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  h3 {
+    font-size: 1.15em;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .subtitle {
+    font-size: 1.15em;
+    color: var(--text-light);
+    margin-bottom: 28px;
+  }
+
+  p, li {
+    font-size: 1.05em;
+    line-height: 1.65;
+    color: var(--text);
+  }
+
+  ul, ol {
+    padding-left: 24px;
+    margin: 12px 0;
+  }
+
+  li { margin-bottom: 6px; }
+
+  a {
+    color: var(--accent-dark);
+    text-decoration: underline;
+    text-decoration-color: rgba(11,110,153,0.3);
+  }
+
+  a:hover { text-decoration-color: var(--accent-dark); }
+
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+
+  kbd {
+    display: inline-block;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.88em;
+    font-family: inherit;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+  }
+
+  /* Comparison table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 1em;
+  }
+
+  th {
+    font-weight: 600;
+    background: var(--code-bg);
+    font-size: 0.92em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-light);
+  }
+
+  /* Two-column layout */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 16px;
+  }
+
+  .columns.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* Callout / highlight box */
+  .callout {
+    background: var(--highlight);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout .icon { font-size: 1.3em; flex-shrink: 0; }
+
+  /* Video embed */
+  .video-embed {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    margin: 16px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .video-embed iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* Screenshot placeholder */
+  .screenshot-placeholder {
+    background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 40px 24px;
+    text-align: center;
+    margin: 16px 0;
+    color: var(--text-light);
+    font-size: 0.95em;
+  }
+
+  .screenshot-placeholder .label {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  /* Badge / tag */
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.78em;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-right: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .badge.purple { background: var(--arq-purple); }
+  .badge.green { background: #00b894; }
+  .badge.orange { background: #e17055; }
+
+  /* Step list */
+  .steps {
+    counter-reset: step;
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .steps li {
+    counter-increment: step;
+    padding-left: 36px;
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.82em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Keyboard shortcut list */
+  .shortcuts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 32px;
+  }
+
+  .shortcuts .shortcut {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .nav-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+  }
+
+  .nav-dot.active {
+    background: var(--accent);
+  }
+
+  .nav-dot:hover {
+    background: rgba(255,255,255,0.5);
+  }
+
+  .slide-counter {
+    position: fixed;
+    bottom: 28px;
+    right: 32px;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.85em;
+    z-index: 100;
+  }
+
+  /* Progress bar */
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.35s ease;
+    z-index: 100;
+  }
+
+  /* Responsive */
+  @media (max-width: 800px) {
+    .slide-inner { padding: 32px 28px; }
+    h1 { font-size: 1.7em; }
+    .columns { grid-template-columns: 1fr; }
+    .columns.three { grid-template-columns: 1fr; }
+    .shortcuts { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ==================== SLIDE 1: Welcome ==================== -->
+  <div class="slide active" data-slide="0">
+    <div class="slide-inner">
+      <h1>Welcome to <span class="accent">Notion</span></h1>
+      <p class="subtitle">Arq Foundation — Team Onboarding (1 hour)</p>
+
+      <div class="callout">
+        <span class="icon">&#128218;</span>
+        <div>
+          <strong>What we'll cover today</strong>
+          <p>A hands-on walkthrough of Notion tailored to how Arq actually uses it — no fluff, just the workflows you'll use every day.</p>
+        </div>
+      </div>
+
+      <h3>Agenda</h3>
+      <table>
+        <tr><td><strong>0–10 min</strong></td><td>Coda → Notion mental model + navigation basics</td></tr>
+        <tr><td><strong>10–20 min</strong></td><td>Blocks, pages, and creating content on the fly</td></tr>
+        <tr><td><strong>20–35 min</strong></td><td>Databases deep-dive: Contacts, Interactions, Tasks</td></tr>
+        <tr><td><strong>35–50 min</strong></td><td>Daily workflows: 3 real scenarios</td></tr>
+        <tr><td><strong>50–60 min</strong></td><td>What lives where + resources &amp; Q&A</td></tr>
+      </table>
+
+      <div class="callout">
+        <span class="icon">&#9654;&#65039;</span>
+        <div>Navigate with <kbd>←</kbd> <kbd>→</kbd> arrow keys, or click the dots below.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 2: Coda → Notion Mental Model ==================== -->
+  <div class="slide" data-slide="1">
+    <div class="slide-inner">
+      <h1>Coda → <span class="accent">Notion</span> Mental Model</h1>
+      <p class="subtitle">Key concepts mapped from what you already know</p>
+
+      <table>
+        <thead>
+          <tr><th>Coda Concept</th><th>Notion Equivalent</th><th>Key Difference</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Doc</td><td>Page</td><td>Pages nest infinitely — every page can contain sub-pages</td></tr>
+          <tr><td>Table</td><td>Database</td><td>Databases have multiple views (table, board, calendar, gallery, list)</td></tr>
+          <tr><td>Section / Folder</td><td>Teamspace / Page tree</td><td>Teamspaces control access; page tree controls organization</td></tr>
+          <tr><td>Row detail</td><td>Page inside database</td><td>Every database row IS a full page — rich content inside each row</td></tr>
+          <tr><td>View</td><td>Database View</td><td>Same data, different layouts — filtered, sorted, grouped</td></tr>
+          <tr><td>Button / Automation</td><td>Button block / Automation</td><td>Similar concept, different UI</td></tr>
+          <tr><td>Formula column</td><td>Formula property</td><td>Different syntax but same idea</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <span class="icon">&#128161;</span>
+        <div>
+          <strong>Biggest mindset shift:</strong> In Notion, <em>everything is a block</em>. Text, images, tables, embeds, databases — all blocks. You can drag, rearrange, and transform any block into another type.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 3: Navigation & Sidebar ==================== -->
+  <div class="slide" data-slide="2">
+    <div class="slide-inner">
+      <h1>Navigation &amp; <span class="accent">Sidebar</span></h1>
+      <p class="subtitle">Finding your way around the Notion workspace</p>
+
+      <div class="columns">
+        <div>
+          <h3>Sidebar Essentials</h3>
+          <ul>
+            <li><strong>Teamspaces</strong> — shared areas for different groups (e.g., "Arq" teamspace)</li>
+            <li><strong>Favorites</strong> — pin pages you use daily (star icon)</li>
+            <li><strong>Private</strong> — your personal pages, only visible to you</li>
+            <li><strong>Search</strong> — <kbd>Cmd</kbd>+<kbd>K</kbd> to instantly find any page</li>
+          </ul>
+
+          <h3>Quick Tips</h3>
+          <ul>
+            <li>Hover over sidebar items to see <code>+</code> and <code>...</code> menus</li>
+            <li>Drag pages to reorder or nest them</li>
+            <li>Toggle sidebar with <kbd>Cmd</kbd>+<kbd>\</kbd></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Watch: Sidebar &amp; Teamspaces (5 min)</h3>
+          <div class="video-embed">
+            <iframe
+              src="https://www.youtube.com/embed/lSmgY5OsZmU"
+              title="Notion Sidebar & Teamspaces"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <p style="margin-top:8px;">
+            <a href="https://www.notion.com/help/navigate-notion" target="_blank">Full guide: Navigate Notion &#8599;</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 4: Blocks & Pages ==================== -->
+  <div class="slide" data-slide="3">
+    <div class="slide-inner">
+      <h1>Blocks &amp; <span class="accent">Pages</span></h1>
+      <p class="subtitle">The building blocks of everything in Notion</p>
+
+      <div class="columns">
+        <div>
+          <h3>Slash Commands</h3>
+          <p>Type <code>/</code> anywhere to see all block types:</p>
+          <ul>
+            <li><code>/heading</code> — H1, H2, H3</li>
+            <li><code>/bullet</code> — Bullet list</li>
+            <li><code>/todo</code> — Checkbox</li>
+            <li><code>/toggle</code> — Collapsible section</li>
+            <li><code>/callout</code> — Highlighted box</li>
+            <li><code>/table</code> — Simple table</li>
+            <li><code>/database</code> — Full database</li>
+            <li><code>/image</code>, <code>/video</code>, <code>/embed</code></li>
+          </ul>
+
+          <div class="callout">
+            <span class="icon">&#128260;</span>
+            <div><strong>Transform any block</strong> — click the <code>⋮⋮</code> handle → "Turn into" to change block types without losing content.</div>
+          </div>
+        </div>
+        <div>
+          <h3>Watch: Block Basics (4 min)</h3>
+          <div class="video-embed">
+            <iframe
+              src="https://www.youtube.com/embed/BZnR2Ml17sc"
+              title="Notion Block Basics"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+
+          <h3 style="margin-top:20px;">Watch: Transforming Blocks (4 min)</h3>
+          <div class="video-embed">
+            <iframe
+              src="https://www.youtube.com/embed/WWbUKPLqJIg"
+              title="Transforming Blocks in Notion"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 5: Creating Pages on the Fly ==================== -->
+  <div class="slide" data-slide="4">
+    <div class="slide-inner">
+      <h1>Creating Pages <span class="accent">on the Fly</span></h1>
+      <p class="subtitle">Speed up your workflow — create pages without leaving your current page</p>
+
+      <div class="columns">
+        <div>
+          <h3>The @ Method</h3>
+          <ol class="steps">
+            <li>Type <code>@</code> followed by a page name</li>
+            <li>If it doesn't exist, select <strong>"Create new page"</strong></li>
+            <li>A linked page is created instantly — click to open</li>
+            <li>Use this inside meeting notes to quickly reference or create people/topic pages</li>
+          </ol>
+
+          <h3>Other Quick Methods</h3>
+          <ul>
+            <li><kbd>Cmd</kbd>+<kbd>N</kbd> — new page in sidebar</li>
+            <li>Type <code>/page</code> — inline sub-page</li>
+            <li><code>+</code> button in sidebar — new page in teamspace</li>
+            <li>Drag text → turn into a page for quick refactoring</li>
+          </ul>
+
+          <div class="callout">
+            <span class="icon">&#128279;</span>
+            <div><strong>Linking tip:</strong> Use <code>@</code> to link to existing pages too — great for cross-referencing contacts in meeting notes.</div>
+          </div>
+        </div>
+        <div>
+          <h3>Watch: Create Pages as You Type (4 min)</h3>
+          <div class="video-embed">
+            <iframe
+              src="https://www.youtube.com/embed/9JewxYGozxk"
+              title="Create Pages as You Type"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 6: Databases — The Core Concept ==================== -->
+  <div class="slide" data-slide="5">
+    <div class="slide-inner">
+      <h1>Databases — <span class="accent">The Core Concept</span></h1>
+      <p class="subtitle">Databases are the backbone of how Arq organizes information in Notion</p>
+
+      <div class="columns">
+        <div>
+          <h3>What Is a Database?</h3>
+          <p>A <strong>collection of pages</strong> with structured properties. Each row is a full page.</p>
+
+          <h3>Key Features</h3>
+          <ul>
+            <li><strong>Properties</strong> — typed fields: text, select, multi-select, date, person, relation, formula</li>
+            <li><strong>Views</strong> — same data, different layouts:
+              <ul>
+                <li><span class="badge">Table</span> Spreadsheet-like</li>
+                <li><span class="badge purple">Board</span> Kanban columns</li>
+                <li><span class="badge green">Calendar</span> Date-based</li>
+                <li><span class="badge orange">List</span> Compact list</li>
+              </ul>
+            </li>
+            <li><strong>Filters</strong> — show only what matters (e.g., "my tasks", "this week's meetings")</li>
+            <li><strong>Sorts</strong> — order by any property</li>
+            <li><strong>Groups</strong> — cluster by category, status, owner, etc.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Watch: Databases Overview (5 min)</h3>
+          <div class="video-embed">
+            <iframe
+              src="https://www.youtube.com/embed/1AR3BxFm8fU"
+              title="Notion Databases Overview"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+
+          <div class="callout" style="margin-top:16px;">
+            <span class="icon">&#128200;</span>
+            <div>
+              <strong>Coming from Coda tables?</strong><br>
+              Notion databases are more visual and flexible. You'll likely use Board view (kanban) for tasks and Table view for contacts/meetings.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 7: Arq Database — Contacts (CRM) ==================== -->
+  <div class="slide" data-slide="6">
+    <div class="slide-inner">
+      <h1>Arq Database: <span class="accent">Contacts</span></h1>
+      <p class="subtitle">Our lightweight CRM — track people we engage with</p>
+
+      <div class="columns">
+        <div>
+          <h3>What It Tracks</h3>
+          <ul>
+            <li><strong>Name</strong> — full name of the contact</li>
+            <li><strong>Organization</strong> — linked to our Organizations DB</li>
+            <li><strong>Role / Title</strong> — their position</li>
+            <li><strong>Tags</strong> — multi-select for categorization (e.g., <code>EU Parliament</code>, <code>AI Safety</code>, <code>Think Tank</code>)</li>
+            <li><strong>Interactions</strong> — relation to meetings/events where we met them</li>
+            <li><strong>Owner</strong> — Arq team member who manages the relationship</li>
+            <li><strong>Notes</strong> — quick context visible in table view</li>
+          </ul>
+
+          <h3>How to Add a Contact</h3>
+          <ol class="steps">
+            <li>Open the Contacts database (link below)</li>
+            <li>Click <strong>"+ New"</strong> to add a row</li>
+            <li>Fill in name, org, role, and tags</li>
+            <li>Open the row page to add detailed notes</li>
+          </ol>
+
+          <p style="margin-top:16px;">
+            <a href="https://www.notion.so/2d801b20d107808a9ac5000b6dcfd8bc" target="_blank"><strong>Open Contacts Database &#8599;</strong></a>
+          </p>
+        </div>
+        <div>
+          <div class="screenshot-placeholder">
+            <div class="label">Screenshot: Contacts Database</div>
+            <p>Replace with a screenshot of the Arq Contacts database table view showing sample entries with tags and organizations.</p>
+          </div>
+
+          <div class="callout">
+            <span class="icon">&#127991;&#65039;</span>
+            <div>
+              <strong>Tagging matters!</strong> Every contact should have at least one tag. Tags help us filter and find contacts by domain (e.g., "show me all EU Parliament contacts"). Ask the team if unsure which tag to use.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 8: Arq Database — Interactions ==================== -->
+  <div class="slide" data-slide="7">
+    <div class="slide-inner">
+      <h1>Arq Database: <span class="accent">Interactions</span></h1>
+      <p class="subtitle">Unified database for all meetings — internal team calls &amp; external stakeholder meetings</p>
+
+      <div class="columns">
+        <div>
+          <h3>What It Tracks</h3>
+          <ul>
+            <li><strong>Title</strong> — descriptive meeting name</li>
+            <li><strong>Date</strong> — when it happened</li>
+            <li><strong>Type</strong> — Internal / External / Event</li>
+            <li><strong>Participants</strong> — linked contacts + team members</li>
+            <li><strong>Related Organizations</strong> — linked orgs</li>
+            <li><strong>Notes</strong> — meeting content, action items, key takeaways</li>
+            <li><strong>Follow-up Tasks</strong> — linked to Spinoff Tasks DB</li>
+          </ul>
+
+          <h3>How to Log a Meeting</h3>
+          <ol class="steps">
+            <li>Open the Interactions database</li>
+            <li>Click <strong>"+ New"</strong></li>
+            <li>Set the title, date, and type</li>
+            <li>Link participants (from Contacts DB)</li>
+            <li>Open the page and write your notes</li>
+            <li>Create follow-up tasks if needed</li>
+          </ol>
+
+          <p style="margin-top:16px;">
+            <a href="https://www.notion.so/2d801b20d10780cd8558000b56a91d6e" target="_blank"><strong>Open Interactions Database &#8599;</strong></a>
+          </p>
+        </div>
+        <div>
+          <div class="screenshot-placeholder">
+            <div class="label">Screenshot: Interactions Database</div>
+            <p>Replace with a screenshot of the Arq Interactions database showing recent meetings with dates, types, and participants.</p>
+          </div>
+
+          <div class="callout">
+            <span class="icon">&#128221;</span>
+            <div>
+              <strong>Pro tip:</strong> After every external meeting, log it here even if brief. This builds our institutional memory — anyone on the team can look up "when did we last talk to [person]?" and find the context.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 9: Arq Database — Spinoff Tasks ==================== -->
+  <div class="slide" data-slide="8">
+    <div class="slide-inner">
+      <h1>Arq Database: <span class="accent">Spinoff Tasks</span></h1>
+      <p class="subtitle">Track action items, follow-ups, and project tasks</p>
+
+      <div class="columns">
+        <div>
+          <h3>Key Properties</h3>
+          <ul>
+            <li><strong>Task Name</strong> — clear, actionable description</li>
+            <li><strong>Owner</strong> — who's responsible</li>
+            <li><strong>Priority Level</strong> — High / Medium / Low</li>
+            <li><strong>Phase</strong> — workflow stage (e.g., "Phase 1: Post-Disclosure")</li>
+            <li><strong>Status</strong> — Not started / In progress / Done</li>
+            <li><strong>Due Date</strong> — deadline</li>
+            <li><strong>Source Interaction</strong> — linked meeting that generated this task</li>
+          </ul>
+
+          <h3>How to Create a Task</h3>
+          <ol class="steps">
+            <li>Open the Spinoff Tasks board</li>
+            <li>Click <strong>"+ New"</strong> in the relevant status column</li>
+            <li>Set name, owner, priority, and due date</li>
+            <li>Link to source interaction if applicable</li>
+          </ol>
+
+          <p style="margin-top:16px;">
+            <a href="https://www.notion.so/2da01b20d10780399557f3510deefa81" target="_blank"><strong>Open Spinoff Tasks &#8599;</strong></a>
+          </p>
+        </div>
+        <div>
+          <div class="screenshot-placeholder">
+            <div class="label">Screenshot: Spinoff Tasks Board</div>
+            <p>Replace with a screenshot of the Arq Spinoff Tasks board view showing kanban columns with sample tasks, owners, and priorities.</p>
+          </div>
+
+          <div class="callout">
+            <span class="icon">&#128640;</span>
+            <div>
+              <strong>Board view</strong> is great for daily standups — drag tasks between columns as they progress. Switch to <strong>Table view</strong> to filter by owner or sort by due date.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 10: Daily Workflows ==================== -->
+  <div class="slide" data-slide="9">
+    <div class="slide-inner">
+      <h1>Daily <span class="accent">Workflows</span></h1>
+      <p class="subtitle">Three real scenarios you'll encounter</p>
+
+      <div class="columns three">
+        <div>
+          <h3>&#128197; After a Meeting</h3>
+          <ol class="steps">
+            <li>Open <a href="https://www.notion.so/2d801b20d10780cd8558000b56a91d6e" target="_blank">Interactions DB</a> → <strong>+ New</strong></li>
+            <li>Set title, date, type, participants</li>
+            <li>Write notes with key takeaways &amp; action items</li>
+            <li>For new people: add to <a href="https://www.notion.so/2d801b20d107808a9ac5000b6dcfd8bc" target="_blank">Contacts DB</a> with tags</li>
+            <li>Create follow-up tasks in <a href="https://www.notion.so/2da01b20d10780399557f3510deefa81" target="_blank">Spinoff Tasks</a></li>
+          </ol>
+        </div>
+        <div>
+          <h3>&#128269; Looking Up a Person</h3>
+          <ol class="steps">
+            <li>Press <kbd>Cmd</kbd>+<kbd>K</kbd> and search their name</li>
+            <li>Check their <strong>Contact page</strong> for role, org, tags</li>
+            <li>Click linked <strong>Interactions</strong> to see past meetings</li>
+            <li>Check the <strong>Intel vault</strong> (Obsidian) for deeper research notes</li>
+          </ol>
+        </div>
+        <div>
+          <h3>&#9989; Managing Your Tasks</h3>
+          <ol class="steps">
+            <li>Open <a href="https://www.notion.so/2da01b20d10780399557f3510deefa81" target="_blank">Spinoff Tasks</a></li>
+            <li>Filter by <strong>Owner = You</strong></li>
+            <li>Sort by due date or priority</li>
+            <li>Drag tasks across columns as you complete them</li>
+            <li>Open a task page for detailed notes</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top:20px;">
+        <span class="icon">&#9200;</span>
+        <div><strong>Time saver:</strong> Save your filtered views! Click "Save view" after filtering — next time you open the database, your custom view is one click away.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 11: What Lives Where ==================== -->
+  <div class="slide" data-slide="10">
+    <div class="slide-inner">
+      <h1>What Lives <span class="accent">Where</span></h1>
+      <p class="subtitle">Our knowledge lives across four systems — here's the map</p>
+
+      <table>
+        <thead>
+          <tr><th>System</th><th>What Goes Here</th><th>Who Uses It</th><th>Access</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Notion</strong></td>
+            <td>Contacts (CRM), meetings, tasks, project boards, team collaboration</td>
+            <td>Everyone</td>
+            <td>Browser / desktop app</td>
+          </tr>
+          <tr>
+            <td><strong>Obsidian</strong> (Intel Vault)</td>
+            <td>Research profiles (people, orgs, topics), deep analysis, event intel, publications</td>
+            <td>Research &amp; strategy team</td>
+            <td>Obsidian app + Claude Code</td>
+          </tr>
+          <tr>
+            <td><strong>GitHub</strong> (this repo)</td>
+            <td>Operations docs, processes, tool guides, templates, code projects</td>
+            <td>Everyone (via Claude Code)</td>
+            <td>Git / Claude Code</td>
+          </tr>
+          <tr>
+            <td><strong>Google Docs</strong></td>
+            <td>Real-time collaborative drafts, external-facing documents, shared editing</td>
+            <td>Everyone</td>
+            <td>Browser</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <span class="icon">&#128161;</span>
+        <div>
+          <strong>Rule of thumb:</strong>
+          <ul style="margin-top:4px;">
+            <li><em>Structured data &amp; daily work</em> → <strong>Notion</strong></li>
+            <li><em>Research intel &amp; strategic analysis</em> → <strong>Obsidian</strong></li>
+            <li><em>Processes, templates, code</em> → <strong>GitHub</strong></li>
+            <li><em>Collaborative writing</em> → <strong>Google Docs</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout">
+        <span class="icon">&#129302;</span>
+        <div>
+          <strong>Claude Code</strong> is the AI layer that connects all four systems. You can ask it to search across Notion, Obsidian, and GitHub, create entries, update records, and answer questions using information from any source.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 12: Resources & Next Steps ==================== -->
+  <div class="slide" data-slide="11">
+    <div class="slide-inner">
+      <h1>Resources &amp; <span class="accent">Next Steps</span></h1>
+      <p class="subtitle">Everything you need to keep learning</p>
+
+      <div class="columns">
+        <div>
+          <h3>Notion Academy</h3>
+          <ul>
+            <li><a href="https://www.notion.com/help/notion-academy/course/101-introduction" target="_blank">Notion Academy 101: Introduction &#8599;</a></li>
+            <li><a href="https://www.notion.com/help/navigate-notion" target="_blank">Guide: Navigate Notion &#8599;</a></li>
+            <li><a href="https://www.notion.com/help/what-is-a-block" target="_blank">Guide: What is a Block? &#8599;</a></li>
+            <li><a href="https://www.notion.com/help/what-is-a-database" target="_blank">Guide: What is a Database? &#8599;</a></li>
+            <li><a href="https://www.notion.com/help/database-views" target="_blank">Guide: Database Views &#8599;</a></li>
+            <li><a href="https://www.notion.com/help/filters-sorts-and-groups" target="_blank">Guide: Filters, Sorts &amp; Groups &#8599;</a></li>
+            <li><a href="https://www.notion.com/help/keyboard-shortcuts" target="_blank">Guide: Keyboard Shortcuts &#8599;</a></li>
+          </ul>
+
+          <h3>Arq Quick Links</h3>
+          <ul>
+            <li><a href="https://www.notion.so/2d801b20d107808a9ac5000b6dcfd8bc" target="_blank">Contacts Database &#8599;</a></li>
+            <li><a href="https://www.notion.so/2d801b20d10780cd8558000b56a91d6e" target="_blank">Interactions Database &#8599;</a></li>
+            <li><a href="https://www.notion.so/2da01b20d10780399557f3510deefa81" target="_blank">Spinoff Tasks &#8599;</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Keyboard Shortcuts Cheat Sheet</h3>
+          <div class="shortcuts">
+            <div class="shortcut"><span>Search</span><kbd>Cmd+K</kbd></div>
+            <div class="shortcut"><span>New page</span><kbd>Cmd+N</kbd></div>
+            <div class="shortcut"><span>Toggle sidebar</span><kbd>Cmd+\</kbd></div>
+            <div class="shortcut"><span>Bold</span><kbd>Cmd+B</kbd></div>
+            <div class="shortcut"><span>Italic</span><kbd>Cmd+I</kbd></div>
+            <div class="shortcut"><span>Link</span><kbd>Cmd+K</kbd></div>
+            <div class="shortcut"><span>Slash command</span><kbd>/</kbd></div>
+            <div class="shortcut"><span>Mention/link</span><kbd>@</kbd></div>
+            <div class="shortcut"><span>Undo</span><kbd>Cmd+Z</kbd></div>
+            <div class="shortcut"><span>Turn into</span><kbd>Cmd+/</kbd></div>
+            <div class="shortcut"><span>Duplicate block</span><kbd>Cmd+D</kbd></div>
+            <div class="shortcut"><span>Move block up</span><kbd>Cmd+Shift+&#8593;</kbd></div>
+          </div>
+
+          <div class="callout" style="margin-top:20px;">
+            <span class="icon">&#127919;</span>
+            <div>
+              <strong>Your first task:</strong> Open the <a href="https://www.notion.so/2d801b20d107808a9ac5000b6dcfd8bc" target="_blank">Contacts DB</a>, find yourself, and check that your profile info is correct. Then try adding a test contact!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation dots -->
+<div class="nav" id="nav"></div>
+<div class="slide-counter" id="counter"></div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const nav = document.getElementById('nav');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const total = slides.length;
+  let current = 0;
+
+  // Build nav dots
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+    dot.addEventListener('click', () => goTo(i));
+    nav.appendChild(dot);
+  }
+
+  function goTo(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    nav.children[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    nav.children[current].classList.add('active');
+    counter.textContent = (current + 1) + ' / ' + total;
+    progress.style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      goTo(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      goTo(current - 1);
+    }
+  });
+
+  // Initialize
+  goTo(0);
+})();
+</script>
+
+</body>
+</html>
